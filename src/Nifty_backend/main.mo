@@ -3,101 +3,116 @@ import Blob "mo:base/Blob";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 import Array "mo:base/Array";
+import Debug "mo:base/Debug"; // Import Debug module untuk logging sederhana
 
 actor {
-  // Variabel stable untuk menyimpan metadata file, pemilik, dan daftar folder
   stable var files : [FileMeta] = [];
-  stable var owners : [Principal] = [];
-  stable var folders : [Text] = []; // Variabel baru untuk menyimpan daftar nama folder
+  stable var folders : [Text] = [];
+  stable var logs : [Text] = []; // Tambahkan variable untuk menyimpan log
 
-  // Definisi tipe FileMeta: sekarang mencakup properti 'folder'
   type FileMeta = {
     name : Text;
     mime_type : Text;
     data : Blob;
-    folder : Text; // Menyimpan nama folder
+    folder : Text;
+    owner : Principal;
   };
 
-  // Fungsi untuk mengunggah dan mencetak NFT (file)
+  // Fungsi helper untuk menambahkan log
+  private func add_log(message : Text) : () {
+      logs := Array.append(logs, [message]);
+      Debug.print("Log: " # message); // Cetak ke stdout di deploy lokal
+  };
+
   public shared({caller}) func upload_and_mint_nft(
     file_bytes : [Nat8],
     name : Text,
     mime_type : Text,
-    folderName : Text // Argumen untuk nama folder
+    folderName : Text
   ) : async Nat {
-    // Pastikan folderName ditambahkan ke daftar folder jika belum ada
-    if (Array.find(folders, func(f) { return f == folderName; }) == null) {
-      folders := Array.append(folders, [folderName]);
+    add_log("Attempting to upload file: " # name # " to folder: " # folderName); // Contoh logging
+    if (Array.find<Text>(folders, func(f : Text) : Bool { return f == folderName; }) == null) {
+      folders := Array.append<Text>(folders, [folderName]);
+      add_log("Created new folder: " # folderName);
     };
 
     let file : FileMeta = {
       name = name;
       mime_type = mime_type;
       data = Blob.fromArray(file_bytes);
-      folder = folderName; // Menyimpan nama folder di metadata file
+      folder = folderName;
+      owner = caller;
     };
-    files := Array.append(files, [file]);
-    owners := Array.append(owners, [caller]);
-    return files.size() - 1; // Mengembalikan indeks file yang baru diunggah
+
+    files := Array.append<FileMeta>(files, [file]);
+    add_log("File " # name # " uploaded by " # Principal.toText(caller));
+    return files.size() - 1;
   };
 
-  // Fungsi untuk mendapatkan daftar file milik pengguna saat ini
   public query({caller}) func get_user_files() : async [FileMeta] {
-  var result : [FileMeta] = [];
-  for (i in files.keys()) {
-    if (owners[i] == caller) {
-      result := Array.append(result, [files[i]]);
-    }
-  }
-  return result;
-}
+    add_log("User " # Principal.toText(caller) # " requested files.");
+    var result : [FileMeta] = [];
+    for (i : Nat in files.keys()) {
+      if (files[i].owner == caller) {
+        result := Array.append<FileMeta>(result, [files[i]]);
+      }
+    };
+    return result;
+  };
 
-  // --- FUNGSI BARU UNTUK MANAJEMEN FOLDER ---
-
-  // Fungsi untuk mendapatkan daftar semua folder yang ada
   public query({caller}) func get_user_folders() : async [Text] {
+    add_log("User " # Principal.toText(caller) # " requested folders.");
     return folders;
   };
 
-  // Fungsi untuk membuat folder baru
   public shared({caller}) func create_folder(name : Text) : async () {
-    // Tambahkan folder hanya jika belum ada untuk menghindari duplikasi
-    if (Array.find(folders, func(f) { return f == name; }) == null) {
-      folders := Array.append(folders, [name]);
-    }
-  };
-
-  // Fungsi untuk mengedit (mengganti nama) folder
-  public shared({caller}) func edit_folder(oldName : Text, newName : Text) : async () {
-    // Cari dan ganti nama folder di daftar folders
-    for (i in folders.keys()) {
-      if (folders[i] == oldName) {
-        folders[i] := newName;
-        break; // Keluar dari loop setelah mengganti
-      }
+    add_log("User " # Principal.toText(caller) # " attempting to create folder: " # name);
+    if (Array.find<Text>(folders, func(f : Text) : Bool { return f == name; }) == null) {
+      folders := Array.append<Text>(folders, [name]);
+      add_log("Folder " # name # " created.");
     };
-    // Perbarui properti folder di semua FileMeta yang terkait dengan folder lama
-    for (f_idx in files.keys()) {
-      if (files[f_idx].folder == oldName) {
-        files[f_idx].folder := newName;
-      }
-    }
   };
 
-  // Fungsi untuk menghapus folder
+  public shared({caller}) func edit_folder(oldName : Text, newName : Text) : async () {
+    add_log("User " # Principal.toText(caller) # " attempting to edit folder from " # oldName # " to " # newName);
+    folders := Array.map<Text, Text>(folders, func(f : Text) : Text {
+      if (f == oldName) newName else f
+    });
+
+    files := Array.map<FileMeta, FileMeta>(files, func(file : FileMeta) : FileMeta {
+      if (file.folder == oldName) {
+        { file with folder = newName }
+      } else {
+        file
+      }
+    });
+    add_log("Folder " # oldName # " edited to " # newName);
+  };
+
   public shared({caller}) func delete_folder(name : Text) : async () {
-    // Hapus folder dari daftar folders
-    folders := Array.filter(folders, func(f) { return f != name; });
+    add_log("User " # Principal.toText(caller) # " attempting to delete folder: " # name);
+    folders := Array.filter<Text>(folders, func(f : Text) : Bool { return f != name; });
 
-    // Pindahkan file yang ada di folder yang dihapus ke 'default_folder'
-    // Atau Anda bisa memilih untuk menghapus file-file ini juga
-    for (f_idx in files.keys()) {
-      if (files[f_idx].folder == name) {
-        files[f_idx].folder := "default_folder"; // Ubah ke folder default
-        // Alternatif: Untuk menghapus file:
-        // files := Array.filter(files, func(f) { return f.folder != name; });
-        // owners := Array.filter(owners, func(o_idx, o) { return files.keys().contains(o_idx); }); // Perlu logika yang lebih kompleks
+    let defaultFolder = "default_folder";
+    if (Array.find<Text>(folders, func(f : Text) : Bool { return f == defaultFolder; }) == null) {
+      folders := Array.append<Text>(folders, [defaultFolder]);
+      add_log("Default folder " # defaultFolder # " ensured after deletion.");
+    };
+
+    files := Array.map<FileMeta, FileMeta>(files, func(file : FileMeta) : FileMeta {
+      if (file.folder == name) {
+        { file with folder = defaultFolder }
+      } else {
+        file
       }
-    }
+    });
+    add_log("Folder " # name # " deleted, associated files moved to " # defaultFolder);
   };
-}
+
+  // Ubah baris ini:
+ public query({caller}) func fetch_canister_logs() : async [Text] { // Pastikan ada ({caller}) di sini
+    // Pastikan tidak ada baris `assert` yang memblokir akses
+    add_log("fetch_canister_logs called by " # Principal.toText(caller));
+    return logs;
+};
+};
