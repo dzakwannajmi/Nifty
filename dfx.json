@@ -4,26 +4,11 @@
       "main": "src/Nifty_backend/main.mo",
       "type": "motoko"
     },
-    "Nifty_frontend": { 
-      "dependencies": [
-        "Nifty_backend"
-      ],
-      "source": [
-        "src/Nifty_frontend/dist"
-      ],
+    "Nifty_frontend": {
+      "dependencies": ["Nifty_backend"],
+      "source": ["src/Nifty_frontend/dist"],
       "type": "assets",
       "workspace": "Nifty_frontend"
-    },
-    "internet_identity": {
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "frontend": {},
-      "remote": {
-        "id": {
-          "ic": "ucwa4-rx777-77774-qaada-cai"
-        }
-      },
-      "type": "custom",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
     }
   },
   "defaults": {
