@@ -1,10 +1,6 @@
 // src/pages/pricing.jsx
 const Pricing = () => {
-  return (
-    <div>
-      {/* Konten halaman Pricing Anda */}
-    </div>
-  );
+  return <div>{}</div>;
 };
 
-export default Pricing; // <--- Tambahkan baris ini
+export default Pricing;
