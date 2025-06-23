@@ -4,6 +4,7 @@
     "npm": ">=7.0.0"
   },
   "name": "Nifty",
+  "license": "MIT",
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "prebuild": "npm run prebuild --workspaces --if-present",
@@ -17,8 +18,15 @@
   ],
   "dependencies": {
     "@dfinity/auth-client": "^2.4.1",
-    "@tailwindcss/vite": "^4.1.8",
-    "react-router-dom": "^7.6.2",
-    "tailwindcss": "^4.1.8"
+    "@tailwindcss/vite": "^4.1.10",
+    "ipfs-http-client": "^60.0.1",
+    "nft.storage": "^7.2.0",
+    "react-router-dom": "^7.6.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.10",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.10"
   }
 }

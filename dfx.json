@@ -18,5 +18,11 @@
     }
   },
   "output_env_file": ".env",
+  "headers": [
+    {
+      "name": "Content-Security-Policy",
+      "value": "default-src 'self'; connect-src 'self' http://localhost:* https://icp0.io https://*.icp0.io https://icp-api.io https://api.pinata.cloud https://upload.pinata.cloud https://uploads.pinata.cloud;"
+    }
+  ],
   "version": 1
 }
