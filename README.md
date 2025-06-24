@@ -7,6 +7,8 @@
 
 Experience Nifty live on the Internet Computer: [https://4aqev-nqaaa-aaaai-atjda-cai.icp0.io/](https://4aqev-nqaaa-aaaai-atjda-cai.icp0.io/)
 
+## Demonstration Video
+
 ## About Nifty
 
 Nifty is a decentralized drive application built on the Internet Computer Protocol (ICP) and leveraging the InterPlanetary File System (IPFS) via Pinata for file storage. Nifty aims to give users full control over their data, offering a secure, censorship-resistant, and distributed file storage solution, free from reliance on centralized servers.
