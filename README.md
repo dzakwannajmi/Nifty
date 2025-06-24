@@ -1,7 +1,6 @@
 # Nifty: Decentralized Drive on the Internet Computer
 
 ### Welcome to Nifty!
-![Image](https://github.com/user-attachments/assets/bc427bd0-9d23-46a9-b96f-8145096158fb)
 ![Nifty Welcome Screen](https://github.com/user-attachments/assets/b4eb564b-eade-4c44-a2fa-e19b2618b3ec)
 
 ## Live Demo
