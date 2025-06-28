@@ -1,15 +1,16 @@
-import React from 'react';
+import React from "react";
 
 const Home = () => {
   return (
     <>
-      {/* Konten Utama Halaman Home */}
+      {" "}
       <main className="max-w-4xl mx-auto p-8 my-12 bg-neutral-900 rounded-xl border border-neutral-800 shadow-xl text-center transition-all duration-300 ease-in-out hover:shadow-2xl hover:border-purple-800">
         <h1 className="text-4xl font-bold text-purple-400 mb-6 tracking-wide">
           Welcome to Nifty!
         </h1>
         <p className="text-gray-300 text-lg leading-relaxed mb-8">
-          Your decentralized file storage solution, secure and efficient, powered by the Internet Computer.
+          Your decentralized file storage solution, secure and efficient,
+          powered by the Internet Computer.
         </p>
         <p className="text-gray-400 text-md leading-relaxed">
           Log in to start managing your files and folders in Cloud3.0.

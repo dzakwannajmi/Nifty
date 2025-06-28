@@ -1,23 +1,11 @@
 import React, { useState, useEffect } from "react";
-// Hapus import NFTStorage
-// import { NFTStorage } from "nft.storage"; // <-- Hapus ini
 import { useOutletContext } from "react-router-dom";
-import { PinataSDK } from "pinata"; // <-- Tambahkan import PinataSDK
+import { PinataSDK } from "pinata";
 
-// Dapatkan JWT Pinata dan domain gateway dari variabel lingkungan
-// Pastikan file .env.local Anda memiliki VITE_PINATA_JWT dan VITE_PINATA_GATEWAY
 const PINATA_JWT = import.meta.env.VITE_PINATA_JWT;
-const PINATA_GATEWAY = import.meta.env.VITE_PINATA_GATEWAY; // e.g., "fun-llama-300.mypinata.cloud"
-
-// Inisialisasi Pinata SDK di sini. Ini akan dibuat satu kali saat komponen dimuat.
-// Penting: Pastikan PINATA_JWT dan PINATA_GATEWAY memiliki nilai yang benar.
-// Anda mungkin ingin menambahkan pengecekan di sini jika nilai env kosong
+const PINATA_GATEWAY = import.meta.env.VITE_PINATA_GATEWAY;
 const pinata = new PinataSDK({
   pinataJwt: PINATA_JWT,
-  // pinataGateway bersifat opsional untuk inisialisasi SDK, tetapi berguna jika Anda ingin SDK mengelola URL gateway
-  // Untuk keperluan upload, hanya JWT yang benar-benar dibutuhkan oleh SDK.
-  // Gateway akan kita gunakan secara manual di handlePreview.
-  // Jika PinataSDK akan mengelola URL API untuk upload: pinataApiUrl: "https://api.pinata.cloud"
 });
 
 export default function Drive() {
@@ -138,16 +126,13 @@ export default function Drive() {
     setMessage("Initiating upload...");
     try {
       setMessage("Uploading to Pinata IPFS...");
-
-      // Mengunggah file menggunakan Pinata SDK
-      // Pinata SDK menerima objek File langsung
       const uploadResponse = await pinata.upload.public.file(selectedFile);
 
       if (!uploadResponse || !uploadResponse.cid) {
         throw new Error("Pinata upload failed: No CID returned.");
       }
 
-      const cid = uploadResponse.cid; // Pinata SDK mengembalikan CID di properti 'cid'
+      const cid = uploadResponse.cid;
       setMessage(`Uploading metadata to blockchain (CID: ${cid})...`);
 
       const res = await actor.upload_file(
@@ -156,21 +141,15 @@ export default function Drive() {
         selectedFile.type,
         selectedUploadFolder
       );
-
-      // Penanganan error dari backend
-      // `res` adalah Result.Result<FileMeta, Text> dari Motoko
       if (res && typeof res === "object" && "Err" in res) {
-        // Jika res.Err adalah record (misal { InvalidMetadata = null }), Object.values(res.Err)[0] bisa bekerja
-        // Jika res.Err adalah string langsung, maka res.Err
         throw new Error(res.Err.toString() || "Unknown backend error");
       }
       if (!res || !res.ok) {
-        // Jika res bukan objek Result yang diharapkan
         throw new Error("Backend did not return a successful 'Ok' response.");
       }
 
-      setSelectedFile(null); // Reset input file setelah upload
-      await fetchFiles(); // Refresh daftar file
+      setSelectedFile(null);
+      await fetchFiles();
       setMessage(
         "Upload successful! Your file is now available in your drive."
       );
@@ -182,10 +161,7 @@ export default function Drive() {
 
   const handlePreview = (f) => {
     if (f.cid && PINATA_GATEWAY) {
-      // Gunakan gateway Pinata Anda untuk preview
       window.open(`https://${PINATA_GATEWAY}/ipfs/${f.cid}`, "_blank");
-      // Alternatif (fallback) jika gateway Pinata tidak disetel atau bermasalah:
-      // window.open(`https://ipfs.io/ipfs/${f.cid}`, "_blank");
     } else {
       setMessage("File CID or Pinata Gateway is missing, cannot preview.");
     }
