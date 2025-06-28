@@ -34,6 +34,10 @@ actor {
     Drive.getFs(userFolders, msg.caller)
   };
 
+  public shared query (msg) func get_user_files() : async [Drive.FileMeta] {
+    Drive.getUserFiles(files, msg.caller)
+  };
+
   public shared (msg) func upload_file(
     cid: Text,
     name: Text,
@@ -55,11 +59,7 @@ actor {
     #ok(newId)
   };
 
-  public shared query (msg) func get_user_files() : async [Drive.FileMeta] {
-    Drive.getUserFiles(files, msg.caller)
-  };
-
-  public shared query (msg) func fetch_canister_logs() : async [Text] {
+  public shared query func fetch_canister_logs() : async [Text] {
     logs
   };
 };
