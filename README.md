@@ -68,7 +68,7 @@ Make sure you have the following installed:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/dzakwannajmi/Nifty.git](https://github.com/dzakwannajmi/Nifty.git) # Replace with your repo URL
+    git clone https://github.com/dzakwannajmi/Nifty.git # Replace with your repo URL
     cd Nifty
     ```
 
@@ -94,20 +94,17 @@ Make sure you have the following installed:
     * ***Important: Ensure your `.env.local` file is not committed to your public Git repository by adding it to `.gitignore`!***
 
 4.  **Content Security Policy (CSP) Configuration:**
-    * Open `src/Nifty_frontend/index.html`.
-    * Locate the `<meta http-equiv="Content-Security-Policy" ...>` tag in the `<head>` section.
-    * Ensure the `content` attribute allows appropriate domains for IPFS, Internet Computer, and Pinata endpoints.
-
-    ```html
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval';
-        style-src 'self' 'unsafe-inline';
-        img-src 'self' data: https://ipfs.io https://*.mypinata.cloud;
-        connect-src 'self' http://localhost:* https://icp0.io https://*.icp0.io https://icp-api.io https://api.pinata.cloud https://upload.pinata.cloud https://uploads.pinata.cloud;
-    ">
+    * Open `public/.ic-assets.json5` and locate the configuration for your frontend assets.
+    * Add or update the `headers` field with the following CSP configuration:
+    ```json5
+    "headers": [
+      {
+        "name": "Content-Security-Policy",
+        "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://ipfs.io https://*.mypinata.cloud; connect-src 'self' http://localhost:* https://icp0.io https://*.icp0.io https://icp-api.io https://api.pinata.cloud https://upload.pinata.cloud https://uploads.pinata.cloud;"
+      }
+    ]
     ```
-    * **Save** the changes to `index.html`.
+    * Save the changes and redeploy to apply the updated CSP settings.
 
 ### Running Locally
 
