@@ -43,27 +43,13 @@ With Nifty, users can manage folders, upload files, and access their data from a
 * **IPFS (InterPlanetary File System):** A peer-to-peer network and protocol for storing and sharing hypermedia in a distributed file system.
 * **Pinata:** A specialized IPFS pinning service that ensures files uploaded to IPFS remain persistent and accessible, handling the complexities of IPFS nodes.
 
-## Development Journey & Overcoming Content Security Policy (CSP) Challenges
+## Future Development Plans
 
-The development of Nifty involved navigating common challenges in decentralized web development, particularly concerning **Content Security Policy (CSP)** when integrating third-party services like Pinata.
+Nifty will continue to evolve with more advanced features to enhance the user experience and flexibility:
 
-Initially, attempts to upload files directly from the frontend to IPFS (using various services) resulted in `Refused to connect` errors due to strict browser CSP rules. CSP is a crucial security layer that dictates which external resources (scripts, styles, images, and network connections) a web page is allowed to load or connect to.
-
-Our journey to a functional file upload involved:
-
-1.  **Initial Blocking by `default-src`:** The browser's default CSP (`default-src 'self'`) prevented any external network requests, including those to IPFS/Pinata APIs.
-2.  **Iterative CSP Refinement:** To resolve this, we meticulously updated the `connect-src` directive within the `<meta http-equiv="Content-Security-Policy">` tag in `src/Nifty_frontend/index.html`. This directive explicitly lists the domains the frontend is allowed to establish connections with.
-3.  **Discovering Pinata's Endpoints:** Pinata, like many cloud services, uses multiple subdomains for different API functionalities (e.g., general API, specific upload endpoints). We encountered and successively added the following Pinata domains to our `connect-src`:
-    * `https://api.pinata.cloud` (for general API interactions)
-    * `https://upload.pinata.cloud` (for some upload mechanisms)
-    * `https://uploads.pinata.cloud` (specifically for `v3/files` uploads, which was a recurring blocker)
-4.  **Internet Computer Endpoints:** Similarly, `connect-src` also had to include Internet Computer mainnet domains (`https://icp0.io`, `https://*.icp0.io`, `https://icp-api.io`) to allow the frontend to communicate with the deployed canisters.
-5.  **Localhost for Development:** For local development, `http://localhost:*` was essential to permit connections to the local DFINITY replica.
-6.  **Crucial Reloads:** A key lesson learned was the importance of performing a **hard browser reload** (clearing cache) after every CSP change, as browsers aggressively cache CSP headers. Regular refreshes are often insufficient.
-7.  **Environment Variable Placement:** Another challenge involved correctly setting up environment variables (`.env.local` for `VITE_PINATA_JWT`, `VITE_PINATA_GATEWAY`) in the precise location (`src/Nifty_frontend/.env.local`) where Vite could pick them up.
-8.  **Motoko Code Consistency:** Ensuring consistency between `main.mo` and `Drive.mo` (especially in `uploadFile` function signatures and `newId` management) was vital to avoid type errors during compilation.
-
-This iterative process of debugging CSP errors and refining the configuration was a significant part of bringing Nifty's decentralized file upload to life.
+- **Delete & Edit File:** Users will be able to delete and modify metadata of uploaded files securely based on their Principal ID.
+- **File Sharing:** A file-sharing system will be introduced to allow users to share access with others using Principal-based permissions.
+- **AI-Generated Files:** Nifty will be equipped with an AI module that can generate files (Word, Excel, PDF, PPT) on demand, based on user input or templates.
 
 ## Getting Started
 
@@ -108,18 +94,17 @@ Make sure you have the following installed:
     * ***Important: Ensure your `.env.local` file is not committed to your public Git repository by adding it to `.gitignore`!***
 
 4.  **Content Security Policy (CSP) Configuration:**
-    As detailed in the "Development Journey" section above, strict CSP rules are essential.
     * Open `src/Nifty_frontend/index.html`.
     * Locate the `<meta http-equiv="Content-Security-Policy" ...>` tag in the `<head>` section.
-    * Ensure the `content` attribute has the exact value as shown below. **Crucially, remove any `/* ... */` comments or other non-standard whitespace within the `content` attribute.**
+    * Ensure the `content` attribute allows appropriate domains for IPFS, Internet Computer, and Pinata endpoints.
 
     ```html
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval';
         style-src 'self' 'unsafe-inline';
-        img-src 'self' data: [https://ipfs.io](https://ipfs.io) https://*.mypinata.cloud;
-        connect-src 'self' http://localhost:* [https://icp0.io](https://icp0.io) https://*.icp0.io [https://icp-api.io](https://icp-api.io) [https://api.pinata.cloud](https://api.pinata.cloud) [https://upload.pinata.cloud](https://upload.pinata.cloud) [https://uploads.pinata.cloud](https://uploads.pinata.cloud);
+        img-src 'self' data: https://ipfs.io https://*.mypinata.cloud;
+        connect-src 'self' http://localhost:* https://icp0.io https://*.icp0.io https://icp-api.io https://api.pinata.cloud https://upload.pinata.cloud https://uploads.pinata.cloud;
     ">
     ```
     * **Save** the changes to `index.html`.
