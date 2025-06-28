@@ -22,4 +22,4 @@ dist/
 .svelte-kit/
 
 # environment variables
-.env.local
+src/Nifty_frontend/.env.local
